@@ -1,0 +1,105 @@
+import requests
+from bs4 import BeautifulSoup
+import csv
+from datetime import datetime
+
+def scrape_clinic_data():
+    # URL of the clinic directory page to scrape
+    url = 'https://example-clinic-directory.com'
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    # List to store scraped data
+    clinics = []
+
+    # Find all clinic profiles on the page
+    for clinic in soup.find_all('div', class_='clinic-profile'):
+        # Extract the company name
+        company_name = clinic.find('div', class_='company-name').text.strip()
+        # Extract the C-level name (management team or founder)
+        c_level_name = clinic.find('div', class_='c-level-name').text.strip()
+        # Extract the address
+        address = clinic.find('div', class_='address').text.strip()
+        # Extract the email address
+        email = clinic.find('a', href='mailto:').get('href')[7:]
+
+        # Append the data to the list
+        clinics.append({
+            'company_name': company_name,
+            'c_level_name': c_level_name,
+            'address': address,
+            'email': email
+        })
+
+    # Save the data to a CSV file
+    with open('clinics.csv', 'a', newline='') as csvfile:
+        fieldnames = ['company_name', 'c_level_name', 'address', 'email']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+        # Write headers only if file is empty
+        if csvfile.tell() == 0:
+            writer.writeheader()
+
+        for clinic in clinics:
+            writer.writerow(clinic)
+
+# Call the function to scrape data
+scrape_clinic_data()
+
+
+Explanation:
+Import Libraries:
+
+requests: Used to send HTTP requests to the website.
+
+BeautifulSoup: Used to parse the HTML content of the web page.
+
+csv: Used to write the scraped data to a CSV file.
+
+datetime: Used to handle date and time operations.
+
+Define the Scraping Function:
+
+def scrape_clinic_data(): This function encapsulates the entire scraping process.
+
+Send an HTTP Request:
+
+response = requests.get(url): Sends a GET request to the specified URL.
+
+soup = BeautifulSoup(response.content, 'html.parser'): Parses the HTML content of the web page.
+
+Initialize a List for Storing Data:
+
+clinics = []: Creates an empty list to store the extracted data.
+
+Find and Extract Data:
+
+for clinic in soup.find_all('div', class_='clinic-profile'): Iterates through all the clinic profiles on the web page.
+
+company_name = clinic.find('div', class_='company-name').text.strip(): Extracts the company name.
+
+c_level_name = clinic.find('div', class_='c-level-name').text.strip(): Extracts the C-level name.
+
+address = clinic.find('div', class_='address').text.strip(): Extracts the address.
+
+email = clinic.find('a', href='mailto:').get('href')[7:]: Extracts the email address.
+
+Append Data to List:
+
+Each extracted clinic profile is appended to the clinics list as a dictionary.
+
+Write Data to CSV File:
+
+with open('clinics.csv', 'a', newline='') as csvfile: Opens the CSV file in append mode.
+
+fieldnames = ['company_name', 'c_level_name', 'address', 'email']: Defines the CSV column headers.
+
+writer = csv.DictWriter(csvfile, fieldnames=fieldnames): Creates a DictWriter object for writing the data.
+
+if csvfile.tell() == 0: Checks if the file is empty and writes the headers.
+
+for clinic in clinics: Writes each clinic profile to the CSV file.
+
+Call the Function:
+
+scrape_clinic_data(): Calls the function to execute the scraping process.
